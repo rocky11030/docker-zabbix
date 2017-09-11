@@ -1,0 +1,5 @@
+---
+- hosts: zabbix_server
+  user: root
+  roles:
+    - zabbix_install

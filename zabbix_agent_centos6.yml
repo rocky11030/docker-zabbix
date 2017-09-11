@@ -1,0 +1,5 @@
+---
+- hosts: zabbix_agent
+  user: root
+  roles:
+    - zabbix_agent_centos6

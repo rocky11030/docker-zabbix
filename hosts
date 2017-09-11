@@ -1,0 +1,17 @@
+[zabbix_server]
+10.23.0.224 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
+
+[zabbix_agent]
+#10.23.0.225 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
+#10.23.0.3 ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.4 ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.[5:27] ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.[30:41] ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.[49:84] ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.28 ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.87 ansible_ssh_user=root ansible_ssh_pass=tianyu
+#10.23.0.[85:90] ansible_ssh_user=root ansible_ssh_pass=tianyu
+
+[total:children]
+zabbix_server
+zabbix_agent

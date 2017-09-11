@@ -1,0 +1,29 @@
+---
+- name: copy selinux config
+  copy: src=selinux dest=/etc/sysconfig/selinux
+
+- name: set selinux disabled
+  shell: setenforce 0
+  ignore_errors: True
+
+- name: copy zabbix-agent package
+  copy:
+    src: zabbix-agent-3.0.9-1.el6.x86_64.rpm
+    dest: /tmp/zabbix-agent-3.0.9-1.el6.x86_64.rpm
+
+- name: Install Zabbix 3.0.9
+  yum: name=/tmp/zabbix-agent-3.0.9-1.el6.x86_64.rpm  state=present
+
+- name: rm zabbix-agent package
+  shell: rm -rf /tmp/zabbix-agent-3.0.9-1.el6.x86_64.rpm
+
+- name: Upload zabbix_agent.conf file
+  template : src=zabbix_agentd.conf dest=/etc/zabbix/zabbix_agentd.conf owner=root group=root mode=0644
+  register: zabbixconfig
+
+- name: start zabbix-agent
+  service: name=zabbix-agent state=started enabled=yes
+
+- name: Restarted the Zabbix agent after the config diff 
+  service: name=zabbix-agent state=restarted
+  when: zabbixconfig.changed

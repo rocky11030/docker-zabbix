@@ -1,0 +1,60 @@
+---
+- name: copy zabbix_server docker images
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: 'mysql_5.5.tar', dest: '/tmp/mysql_5.5.tar'}
+    - {src: 'zabbix_server_ubuntu_3.0.9.tar', dest: '/tmp/zabbix_server_ubuntu_3.0.9.tar'}
+    - {src: 'zabbix_apache_ubuntu_3.0.9.tar', dest: '/tmp/zabbix_apache_ubuntu_3.0.9.tar'}
+
+- name: docker import zabbix_server images
+  shell: docker load -i {{ item }}
+  with_items:
+    - /tmp/mysql_5.5.tar
+    - /tmp/zabbix_server_ubuntu_3.0.9.tar
+    - /tmp/zabbix_apache_ubuntu_3.0.9.tar
+
+- name: create mysql docker container
+  docker_container:
+    name: mysql
+    image: mysql:5.5
+    detach: True
+    network_mode: host
+    ports:
+      - "3306:3306"
+    command: mysql --character-set-server=utf8
+    env:
+      MYSQL_ROOT_PASSWORD: zabbix
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: zabbix
+      DB_SERVICE_PORT: 3306
+      
+      
+- name: create zabbix-server docker container
+  docker_container:
+    name: zabbix-server
+    image: zabbix/zabbix-server-mysql:ubuntu-3.0.9
+    detach: True
+    network_mode: host
+    ports:
+      - "10051:10051"
+    env:
+      DB_SERVER_HOST: 192.168.10.194
+      MYSQL_USER: root
+      MYSQL_PASSWORD: zabbix
+      DB_SERVICE_PORT: 3306
+
+- name: create zabbix-apache docker container
+  docker_container:
+    name: apache
+    image: zabbix/zabbix-web-apache-mysql:ubuntu-3.0.9
+    detach: True
+    network_mode: host
+    ports:
+      - "8088:80"
+    env:
+      DB_SERVER_HOST: 192.168.10.194
+      DB_SERVICE_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: zabbix
+      ZBX_SERVER_HOST: 192.168.10.194
+      TZ: Asia/Shanghai

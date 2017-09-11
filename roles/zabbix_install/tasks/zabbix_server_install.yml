@@ -1,0 +1,106 @@
+---
+- name: copy zabbix_server docker images
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: 'zabbix_server_images/mysql_5.5.tar', dest: '/tmp/mysql_5.5.tar'}
+    - {src: 'zabbix_server_images/zabbix_server_ubuntu_3.0.9.tar', dest: '/tmp/zabbix_server_ubuntu_3.0.9.tar'}
+    - {src: 'zabbix_server_images/zabbix_apache_ubuntu_3.0.9.tar', dest: '/tmp/zabbix_apache_ubuntu_3.0.9.tar'}
+
+- name: docker import zabbix_server images
+  shell: docker load -i {{ item }}
+  with_items:
+    - /tmp/mysql_5.5.tar
+    - /tmp/zabbix_server_ubuntu_3.0.9.tar
+    - /tmp/zabbix_apache_ubuntu_3.0.9.tar
+
+- name: create mysql_data directory
+  file: path={{ mysql_data_path }} state=directory
+  tags:
+    - docker1
+
+- name: create mysql docker container
+  docker_container:
+    name: {{ mysql_docker_name }}
+    image: mysql:5.5
+    detach: True
+    ports:
+      - "3306:3306"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
+    env:
+      MYSQL_ROOT_PASSWORD: {{ root_passwd }}
+      MYSQL_ROOT_HOST: {{ root_host }}
+      MYSQL_DATABASE: {{ database }}
+      DB_SERVICE_PORT: {{ database_port }}
+    volumes:
+      - "{{ mysql_docker_name }}:/var/lib/mysql"
+  tags:
+    - docker1      
+      
+- name: create zabbix_server_conf directory
+  file: path={{ zabbix_server_path }} state=directory mode=755
+  tags:
+    - docker2
+
+- name: copy zabbix_server config
+  template: src=zabbix_server.conf dest={{ zabbix_server_path }}/zabbix_server.conf
+  tags:
+    - docker2
+
+- name: create zabbix-server docker container
+  docker_container:
+    name: {{ zabbix_server_dockername }}
+    image: zabbix/zabbix-server-mysql:ubuntu-3.0.9
+    detach: True
+    ports:
+      - "10051:10051"
+    env:
+      DB_SERVER_HOST: {{ db_host }}
+      MYSQL_USER: {{ db_user }}
+      MYSQL_PASSWORD: {{ db_passwd }}
+      DB_SERVICE_PORT: {{ db_port }}
+    volumes:
+      - "{{ zabbix_server_path }}:/etc/zabbix"
+  tags:
+    - docker2
+
+- name: create zabbix-apache docker container
+  docker_container:
+    name: {{ zabbix_web_dockername }}
+    image: zabbix/zabbix-web-apache-mysql:ubuntu-3.0.9
+    detach: True
+    ports:
+      - "{{ apache_web_port }}:80"
+    env:
+      DB_SERVER_HOST: {{ db_host }}
+      DB_SERVICE_PORT: {{ db_port }}
+      MYSQL_USER: {{ db_user }}
+      MYSQL_PASSWORD: {{ db_passwd }}
+      ZBX_SERVER_HOST: {{ 192.168.10.196 }}
+      TZ: Asia/Shanghai
+  tags:
+    - docker3
+
+- name: create zabbix_agent_conf directory
+  file: path={{ /opt/zabbix_agent_conf }} state=directory mode=755
+  tags:
+    - docker4
+
+- name: copy zabbix_agent config
+  template: src=zabbix_agentd.conf dest={{ /opt/zabbix_agent_conf }}/zabbix_agentd.conf
+  tags:
+    - docker4
+
+- name: create zabbix-agent docker container
+  docker_container:
+    name: {{ zabbix_server_dockername }}
+    image: zabbix/zabbix-agent:ubuntu-3.0.9
+    detach: True
+    ports:
+      - "10050:10050"
+    env:
+      ZBX_SERVER_HOST: {{ zabbix_server_host }}
+      ZBX_SERVER_PORT: 10051
+    volumes:
+      - {{ /opt/zabbix_agent_conf }}:/etc/zabbix:rw
+  tags:
+    - docker4

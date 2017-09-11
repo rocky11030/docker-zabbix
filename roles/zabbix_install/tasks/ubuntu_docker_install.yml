@@ -1,0 +1,17 @@
+---
+- name: copy the ubuntu docker file
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - {src: 'ubuntu_docker/libsystemd-journal0_208-8ubuntu8_amd64.deb', dest: '/tmp/libsystemd-journal0_208-8ubuntu8_amd64.deb'}
+    - {src: 'ubuntu_docker/libltdl7_2.4.2-1.7ubuntu1_amd64.deb', dest: '/tmp/libltdl7_2.4.2-1.7ubuntu1_amd64.deb'}
+    - {src: 'ubuntu_docker/docker-engine_1.12.1-0~trusty_amd64.deb', dest: '/tmp/docker-engine_1.12.1-0~trusty_amd64.deb'}
+
+- name: install docker 1.12
+  shell: cd /tmp && deb -i libsystemd-journal0_208-8ubuntu8_amd64.deb && deb -i libltdl7_2.4.2-1.7ubuntu1_amd64.deb && deb -i docker-engine_1.12.1-0~trusty_amd64.deb
+  tags:
+    - installs
+
+- name: start docker service
+  service: name=docker state=started
+  tags:
+    - starts
