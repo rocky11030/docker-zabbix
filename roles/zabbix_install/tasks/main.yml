@@ -1,12 +1,12 @@
 ---
 - include: centos_docker_install.yml
-  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == 7
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version  == "7"
   
-- include: ubuntu_docker_install.yml
-  when: ansible_distribution == 'Ubuntu' and {{ ansible_distribution_version | version_compare('14.04', '>=') }}
+#- include: ubuntu_docker_install.yml
+#  when: ansible_distribution == "Ubuntu" and {{ ansible_distribution_version | version_compare('14.04', '>=') }}
 
 - include: zabbix_server_install.yml
   when: "'zabbix_server' in group_names"
 
 - include: zabbix_agent_install.yml
-  when: "'zabbix_agent' in group_names"
+  when: "'zabbix_agent' in group_names and ansible_distribution_major_version != '6'"

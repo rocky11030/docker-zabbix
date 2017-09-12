@@ -1,8 +1,8 @@
 [zabbix_server]
-10.23.0.224 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
+#10.23.0.224 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
 
 [zabbix_agent]
-#10.23.0.225 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
+10.23.0.225 ansible_ssh_user=root ansible_ssh_pass=Neunn2016
 #10.23.0.3 ansible_ssh_user=root ansible_ssh_pass=tianyu
 #10.23.0.4 ansible_ssh_user=root ansible_ssh_pass=tianyu
 #10.23.0.[5:27] ansible_ssh_user=root ansible_ssh_pass=tianyu

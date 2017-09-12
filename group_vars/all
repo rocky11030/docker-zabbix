@@ -3,29 +3,30 @@
 ######################
 #mysql docker
 mysql_data_path: /opt/mysql_data
-mysql_docker_name: mysql
+mysql_dockername: mysql
 root_passwd: zabbix
 root_host: "%"
 database: zabbix
 database_port: 3306
 #zabbix-server
-zabbix_server_path: /opt/zabbix_server_conf
-zabbix_server_dockername: zabbix-server
+zbx_server_path: /opt/zabbix_server_conf
+zbx_server_dockername: zabbix-server
 db_host: 192.168.10.196
 db_user: root
 db_passwd: zabbix
 db_port: 3306
+zbx_server_dockernet: 172.17.0.3
 #apache
-zabbix_web_dockername: apache
+zbx_web_dockername: apache
 apache_web_port: 8088
-zabbix_server_host: 192.168.10.196
+zbx_server_host: 192.168.10.196
 #zabbix-agent
-zabbix_agent_path: /opt/zabbix_agent_conf
-zabbix_server_dockername: zabbix-agent
+zbx_agent_path: /opt/zabbix_agent_conf
+zbx_agent_dockername: zabbix-agent
 
-##################
-#zabbix-server配置#
-##################
+############################
+#Centos6: zabbix-server配置#
+############################
 
 #被动模式变量设置
 b_Server: 192.168.10.196
@@ -33,7 +34,7 @@ b_StartAgents: 5
 
 #基本变量配置
 agent_port: 10050
-agent_hostname: "{{ facter_ipaddress }}"
+agent_hostname: "{{ ansible_default_ipv4.address }}"
 
 #主动模式配置
 a_ServerActive: 192.168.10.196

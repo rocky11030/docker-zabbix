@@ -14,6 +14,7 @@
 
 - name: install docker 1.12
   shell: cd /tmp && yum install -y docker-engine-selinux-1.12.6-1.el7.centos.noarch.rpm && yum install -y docker-engine-1.12.6-1.el7.centos.x86_64.rpm
+  ignore_errors: True  
   tags:
     - installs
 
@@ -27,9 +28,10 @@
 
 - name: exec centos7 sources
   shell: rpm -ivh /tmp/epel-release-latest-7.noarch.rpm
+  ignore_errors: True
 
 - name: install python-pip
-  yum: name=python-pip state=present force=yes
+  yum: name=python-pip state=present
 
 - name: install docker-py
   pip:
